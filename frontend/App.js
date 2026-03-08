@@ -3,6 +3,9 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Animat
 
 const { width, height } = Dimensions.get('window');
 
+// Use 127.0.0.1 for Web. Use 10.0.2.2 for Android Emulator. Use your local IP (e.g., 192.168.1.5) for real phone.
+const API_BASE_URL = "http://127.0.0.1:8000";
+
 const colors = {
     background: '#0F172A', // Deep dark premium blue
     card: '#1E293B',
@@ -33,9 +36,42 @@ export default function App() {
     const [hasPolicy, setHasPolicy] = useState(false);
     const [disruptionModal, setDisruptionModal] = useState(false);
 
+    // Backend Connection States
+    const [premiumAmount, setPremiumAmount] = useState('...');
+    const [dbStatus, setDbStatus] = useState('');
+
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(height)).current;
+
+    const handleSetupComplete = async () => {
+        setScreen('Dashboard'); // Move immediately for better UI experience
+        try {
+            // 1. Send data to our test_db endpoint (Proving we can save to MongoDB)
+            const resData = await fetch(`${API_BASE_URL}/test_db`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: `${platform} Rider - ${phone.substring(0, 4)}` })
+            });
+            const dbData = await resData.json();
+
+            if (dbData.status === "Success") {
+                setDbStatus("✅ Connected to MongoDB remotely!");
+            }
+
+            // 2. Get calculated premium from Python backend (Proving dynamic API)
+            const premiumRes = await fetch(`${API_BASE_URL}/get_premium`);
+            const premiumData = await premiumRes.json();
+
+            if (premiumData.calculated_premium) {
+                setPremiumAmount(premiumData.calculated_premium);
+            }
+        } catch (error) {
+            console.log("Error contacting backend: ", error);
+            setPremiumAmount(49); // Fallback mock
+            setDbStatus("⚠️ Working Offline (Connection Failed)");
+        }
+    };
 
     useEffect(() => {
         if (screen === 'Splash') {
@@ -163,8 +199,8 @@ export default function App() {
                     />
                     <Text style={styles.helperText}>📍 We auto-detected Hyderabad based on your GPS.</Text>
 
-                    <TouchableOpacity style={[styles.primaryButton, { marginTop: 30 }]} onPress={() => setScreen('Dashboard')}>
-                        <Text style={styles.buttonText}>Go to Dashboard</Text>
+                    <TouchableOpacity style={[styles.primaryButton, { marginTop: 30 }]} onPress={handleSetupComplete}>
+                        <Text style={styles.buttonText}>Save Profile & Go to Dashboard</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -201,7 +237,7 @@ export default function App() {
                     <View style={styles.divider} />
                     <View style={styles.rowBetween}>
                         <Text style={{ fontSize: 18, color: colors.text }}>Total Premium</Text>
-                        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.success }}>₹59</Text>
+                        <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.success }}>₹{premiumAmount}</Text>
                     </View>
 
                     <TouchableOpacity
@@ -211,7 +247,7 @@ export default function App() {
                             setScreen('Dashboard');
                         }}
                     >
-                        <Text style={styles.buttonText}>Pay ₹59 via UPI</Text>
+                        <Text style={styles.buttonText}>Pay ₹{premiumAmount} via UPI</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -246,10 +282,15 @@ export default function App() {
                         <Text style={[styles.textNorm, { marginVertical: 10 }]}>
                             High heat expected this week. Protect your income for the next 7 days in {zone}.
                         </Text>
+                        {dbStatus !== '' && (
+                            <Text style={[styles.textMuted, { fontSize: 12, marginBottom: 15, fontStyle: 'italic', color: dbStatus.includes('✅') ? colors.success : colors.warning }]}>
+                                {dbStatus}
+                            </Text>
+                        )}
                         <View style={styles.rowBetween}>
                             <View>
                                 <Text style={styles.textMuted}>Premium</Text>
-                                <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.success }}>₹59</Text>
+                                <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.success }}>₹{premiumAmount}</Text>
                             </View>
                             <TouchableOpacity style={styles.primaryButtonHalf} onPress={() => setScreen('Checkout')}>
                                 <Text style={styles.buttonText}>Get Covered</Text>
