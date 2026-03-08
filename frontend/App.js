@@ -39,6 +39,7 @@ export default function App() {
     // Backend Connection States
     const [premiumAmount, setPremiumAmount] = useState('...');
     const [dbStatus, setDbStatus] = useState('');
+    const [weatherInfo, setWeatherInfo] = useState({ temp: '--', icon: '☁️', desc: 'Loading...' });
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -60,11 +61,23 @@ export default function App() {
             }
 
             // 2. Get calculated premium from Python backend (Proving dynamic API)
-            const premiumRes = await fetch(`${API_BASE_URL}/get_premium`);
+            // Extract a pin code from the zone string (Defaults down if none is found)
+            const pincodeMatch = zone.match(/\d+/);
+            const rawPincode = pincodeMatch ? pincodeMatch[0] : "500081";
+
+            const premiumRes = await fetch(`${API_BASE_URL}/get_premium/${rawPincode}`);
             const premiumData = await premiumRes.json();
 
             if (premiumData.calculated_premium) {
                 setPremiumAmount(premiumData.calculated_premium);
+
+                // Read Weather Data
+                const wd = premiumData.weather_data;
+                setWeatherInfo({
+                    temp: wd.temperature_celsius,
+                    icon: wd.description.includes('Rain') ? '⛈️' : (wd.description.includes('Heat') ? '🔥' : '☀️'),
+                    desc: wd.description
+                });
             }
         } catch (error) {
             console.log("Error contacting backend: ", error);
@@ -267,8 +280,8 @@ export default function App() {
                         <Text style={styles.title}>Your Dashboard</Text>
                     </View>
                     <View style={styles.weatherBadge}>
-                        <Text style={{ fontSize: 24 }}>☀️</Text>
-                        <Text style={{ color: colors.text, fontWeight: 'bold' }}>38°C</Text>
+                        <Text style={{ fontSize: 24 }}>{weatherInfo.icon}</Text>
+                        <Text style={{ color: colors.text, fontWeight: 'bold' }}>{weatherInfo.temp}°C</Text>
                     </View>
                 </View>
 
@@ -280,7 +293,7 @@ export default function App() {
                             <Text>⚠️</Text>
                         </View>
                         <Text style={[styles.textNorm, { marginVertical: 10 }]}>
-                            High heat expected this week. Protect your income for the next 7 days in {zone}.
+                            Forecast: {weatherInfo.desc}. Protect your income against lost hours in {zone}.
                         </Text>
                         {dbStatus !== '' && (
                             <Text style={[styles.textMuted, { fontSize: 12, marginBottom: 15, fontStyle: 'italic', color: dbStatus.includes('✅') ? colors.success : colors.warning }]}>

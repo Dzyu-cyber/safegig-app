@@ -5,7 +5,10 @@ from pymongo.errors import ServerSelectionTimeoutError
 from fastapi.middleware.cors import CORSMiddleware
 import time
 
-app = FastAPI(title="SafeGig Backend - Phase 2")
+from ai_engine import ai_engine
+from weather_api import get_weather_for_pincode
+
+app = FastAPI(title="SafeGig Backend - Phase 4")
 
 # --- App Configuration & CORS ---
 app.add_middleware(
@@ -17,7 +20,6 @@ app.add_middleware(
 )
 
 # --- Database Setup (MongoDB) ---
-# We use a try-except block in case MongoDB is not installed/running yet
 try:
     client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=2000)
     client.server_info()  # Forces a check to ensure it's connected
@@ -30,15 +32,26 @@ except ServerSelectionTimeoutError:
     users_collection = None
 
 
-# --- Phase 2: Route 1 - The "Calculator" ---
-@app.get("/get_premium")
-def get_premium():
+# --- Phase 4: Route 1 - The "Smart Brain" Calculator ---
+@app.get("/get_premium/{pincode}")
+def get_premium(pincode: str):
     """
-    Goal: Prove the backend can respond via the internet with simple math.
+    Goal: Pull real weather via API simulation and use Scikit-learn to determine premium.
     """
+    # 1. Fetch live weather using our external API simulator
+    weather_data = get_weather_for_pincode(pincode)
+    
+    # 2. Feed that data into the AI Model
+    calculated_premium = ai_engine.calculate_weekly_premium(
+        temperature_c=weather_data["temperature_celsius"],
+        rain_probability=weather_data["rain_probability_percent"]
+    )
+
     return {
-        "message": "Success",
-        "calculated_premium": 49,
+        "message": "AI Premium Calculated",
+        "pincode": pincode,
+        "weather_data": weather_data,
+        "calculated_premium": calculated_premium,
         "currency": "INR"
     }
 
@@ -49,24 +62,16 @@ class MockUser(BaseModel):
 
 @app.post("/test_db")
 def test_db_connection(user: MockUser):
-    """
-    Goal: Prove we can save a fake user ('Test') to MongoDB and read it back.
-    """
     if db is None or users_collection is None:
         return {"error": "MongoDB is not running. Please start MongoDB locally!"}
 
-    # 1. SAVE to MongoDB
     fake_user_data = {
         "name": user.name,
         "timestamp": time.time(),
         "role": "Delivery Partner"
     }
     insert_result = users_collection.insert_one(fake_user_data)
-    
-    # 2. READ it back using the inserted ID
     saved_user = users_collection.find_one({"_id": insert_result.inserted_id})
-    
-    # Convert MongoDB's special ObjectId to a string so FastAPI can return it safely
     saved_user["_id"] = str(saved_user["_id"])
 
     return {
@@ -75,11 +80,10 @@ def test_db_connection(user: MockUser):
         "saved_and_retrieved_data": saved_user
     }
 
-
-# --- Phase 2: Base Route ---
+# --- Base Route ---
 @app.get("/")
 def home():
     return {
-        "app": "SafeGig Backend Phase 2",
+        "app": "SafeGig Backend Phase 4",
         "db_status": db_status
     }

@@ -1,48 +1,37 @@
 import numpy as np
-from sklearn.ensemble import IsolationForest
+from sklearn.linear_model import LinearRegression
 
 class AIEngine:
     def __init__(self):
-        # Initialize Fraud Detection Model (Anomaly Detection)
-        self.fraud_detector = IsolationForest(contamination=0.05, random_state=42)
-        # Dummy training data: [GPS_distance_from_zone, deliveries_completed_during_event, velocity_kmh]
-        dummy_data = np.array([[2, 0, 0], [1, 0, 0], [3, 0, 0], [40, 5, 60]]) 
-        self.fraud_detector.fit(dummy_data)
-
-    def calculate_weekly_premium(self, zone: str, weather_forecast: dict) -> float:
-        """
-        AI Dynamic Pricing based on Weekly Forecast.
-        Base premium is ₹49. Risk adds up.
-        """
-        base_premium = 49.0
-        risk_multiplier = 1.0
-
-        # Analyze forecast
-        if weather_forecast.get("rain_probability", 0) > 70:
-            risk_multiplier += 0.4  # High chance of rain
-        if weather_forecast.get("max_temp", 30) > 42:
-            risk_multiplier += 0.3  # Heatwave expected
-        if weather_forecast.get("historical_strike_risk", "Low") == "High":
-            risk_multiplier += 0.2
+        # Initialize a basic Linear Regression Model for premium pricing
+        self.pricing_model = LinearRegression()
         
-        final_premium = round(base_premium * risk_multiplier, 2)
-        # Cap premium at ₹99/week
-        return min(final_premium, 99.0)
+        # Historical Data: X = [Temperature_C, Rain_Probability_%]
+        # Y = Premium in Rupees (Target based on historical loss ratios)
+        X_train = np.array([
+            [30, 10],  # Normal day -> Base risk
+            [35, 20],  # Warm day -> Slight risk
+            [40, 10],  # Very hot  -> Elevated risk
+            [45, 0],   # Extreme Heatwave -> High payout risk
+            [25, 60],  # Cool but rainy -> High risk
+            [28, 90],  # Heavy Storm -> Very High risk
+        ])
+        
+        # Premiums required to cover those risks safely
+        y_train = np.array([49, 52, 65, 80, 75, 95])
+        
+        # Train our model right when the server starts!
+        self.pricing_model.fit(X_train, y_train)
 
-    def detect_fraud(self, user_gps_distance: float, deliveries_during_event: int, moving_velocity: float) -> bool:
+    def calculate_weekly_premium(self, temperature_c: float, rain_probability: float) -> int:
         """
-        Returns True if FRAUD is detected, False if claim is VALID.
+        Takes live weather data and predicts the exact premium dynamically.
         """
-        features = np.array([[user_gps_distance, deliveries_during_event, moving_velocity]])
-        prediction = self.fraud_detector.predict(features)
+        features = np.array([[temperature_c, rain_probability]])
+        predicted_premium = self.pricing_model.predict(features)[0]
         
-        # -1 means Anomaly (Fraud), 1 means Normal (Valid)
-        is_fraud = prediction[0] == -1
-        
-        # Additional logical checks
-        if user_gps_distance > 15: # User is 15km away from the rain zone
-            is_fraud = True
-            
-        return is_fraud
+        # Hard cap the premium constraints to prevent crazy numbers
+        final_premium = max(49, min(int(predicted_premium), 99))
+        return final_premium
 
 ai_engine = AIEngine()
