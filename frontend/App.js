@@ -144,7 +144,7 @@ export default function App() {
                 <View style={styles.card}>
                     <Text style={styles.label}>Select Platform</Text>
                     <View style={styles.row}>
-                        {['Zomato', 'Swiggy', 'Zepto'].map(p => (
+                        {['Zomato', 'Swiggy'].map(p => (
                             <TouchableOpacity
                                 key={p}
                                 style={[styles.chip, platform === p && styles.chipActive]}
