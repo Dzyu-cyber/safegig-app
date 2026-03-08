@@ -27,11 +27,13 @@ try:
     client.server_info()  # Forces a check to ensure it's connected
     db = client["safegig_db"]
     users_collection = db["users"]
+    policies_collection = db["policies"]
     db_status = "Connected to MongoDB successfully! ✅"
 except ServerSelectionTimeoutError:
     db_status = "Failed to connect to MongoDB. Is the server running? ❌"
     db = None
     users_collection = None
+    policies_collection = None
 
 
 # --- Phase 4: Route 1 - The "Smart Brain" Calculator ---
@@ -80,6 +82,34 @@ def test_db_connection(user: MockUser):
         "status": "Success",
         "database_status": db_status,
         "saved_and_retrieved_data": saved_user
+    }
+
+# --- Phase 6: Purchase Policy (Mock Razorpay Integration) ---
+class PolicyRequest(BaseModel):
+    user_id: str
+    zone: str
+    premium_paid: int
+
+@app.post("/buy_policy")
+def buy_policy(request: PolicyRequest):
+    if db is None or policies_collection is None:
+        return {"error": "MongoDB is not running"}
+
+    policy_doc = {
+        "user_id": request.user_id,
+        "zone": request.zone,
+        "premium_paid": request.premium_paid,
+        "coverage_amount": 4000,
+        "status": "Active",
+        "start_date": time.time(),
+        "expiration_date": time.time() + (7 * 24 * 60 * 60) # 7 days
+    }
+    insert_result = policies_collection.insert_one(policy_doc)
+    
+    return {
+        "status": "Success",
+        "message": "Policy safely recorded in MongoDB",
+        "policy_id": str(insert_result.inserted_id)
     }
 
 # --- Base Route ---

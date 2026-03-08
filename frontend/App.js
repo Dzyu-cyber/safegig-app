@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Animated, Dimensions, StatusBar, ActivityIndicator } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,6 +27,8 @@ export default function App() {
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [otpSent, setOtpSent] = useState(false);
+    const [isAuthLoading, setIsAuthLoading] = useState(false);
+    const [isPayLoading, setIsPayLoading] = useState(false);
 
     // Setup States
     const [platform, setPlatform] = useState('Zomato');
@@ -171,11 +173,20 @@ export default function App() {
                     <TouchableOpacity
                         style={styles.primaryButton}
                         onPress={() => {
-                            if (!otpSent) setOtpSent(true);
-                            else setScreen('Setup');
+                            setIsAuthLoading(true);
+                            setTimeout(() => {
+                                setIsAuthLoading(false);
+                                if (!otpSent) setOtpSent(true);
+                                else setScreen('Setup');
+                            }, 1500);
                         }}
+                        disabled={isAuthLoading}
                     >
-                        <Text style={styles.buttonText}>{otpSent ? "Verify & Continue" : "Send OTP"}</Text>
+                        {isAuthLoading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>{otpSent ? "Verify Mobile (Auth)" : "Send OTP"}</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -255,12 +266,35 @@ export default function App() {
 
                     <TouchableOpacity
                         style={[styles.primaryButton, { marginTop: 30, backgroundColor: colors.success }]}
-                        onPress={() => {
-                            setHasPolicy(true);
-                            setScreen('Dashboard');
+                        onPress={async () => {
+                            setIsPayLoading(true);
+                            try {
+                                const pincodeMatch = zone.match(/\d+/);
+                                const rawPincode = pincodeMatch ? pincodeMatch[0] : "500081";
+
+                                await fetch(`${API_BASE_URL}/buy_policy`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ user_id: phone || "Unknown", zone: rawPincode, premium_paid: premiumAmount })
+                                });
+
+                                setTimeout(() => {
+                                    setIsPayLoading(false);
+                                    setHasPolicy(true);
+                                    setScreen('Dashboard');
+                                }, 2000);
+                            } catch (e) {
+                                setIsPayLoading(false);
+                                console.log(e);
+                            }
                         }}
+                        disabled={isPayLoading}
                     >
-                        <Text style={styles.buttonText}>Pay ₹{premiumAmount} via UPI</Text>
+                        {isPayLoading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Pay ₹{premiumAmount} via UPI</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
