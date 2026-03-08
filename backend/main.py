@@ -3,7 +3,9 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.background import BackgroundScheduler
 import time
+import datetime
 
 from ai_engine import ai_engine
 from weather_api import get_weather_for_pincode
@@ -84,6 +86,35 @@ def test_db_connection(user: MockUser):
 @app.get("/")
 def home():
     return {
-        "app": "SafeGig Backend Phase 4",
+        "app": "SafeGig Backend Phase 5",
         "db_status": db_status
     }
+
+# --- Phase 5: The Watchman (Automated Triggers) ---
+def parametric_monitor_job():
+    """
+    Runs every minute in the background.
+    """
+    print(f"\n[{datetime.datetime.now()}] 🌤️ Checking weather for active zones...")
+    
+    # In a real app we would loop through MongoDB active policies here.
+    # For now, let's monitor standard "500081" and the trigger condition "500089"
+    test_zones = ["500081", "500089"]
+    
+    for zone in test_zones:
+        weather = get_weather_for_pincode(zone)
+        print(f"Zone {zone}: Temp {weather['temperature_celsius']}°C, Rain Prob: {weather['rain_probability_percent']}%")
+        
+        if weather['rain_probability_percent'] > 50:
+            print(f"🚨 DISRUPTION DETECTED in {zone}: Heavy Rain!")
+            print(f"💸 TRIGGER PAYOUT: Sending ₹500 to workers in {zone} instantly!")
+        elif weather['temperature_celsius'] > 45:
+            print(f"🚨 DISRUPTION DETECTED in {zone}: Extreme Heat!")
+            print(f"💸 TRIGGER PAYOUT: Sending ₹500 to workers in {zone} instantly!")
+
+@app.on_event("startup")
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(parametric_monitor_job, 'interval', minutes=1)
+    scheduler.start()
+    print("Watchman Scheduler Started! Monitoring for disruptions every minute.")
