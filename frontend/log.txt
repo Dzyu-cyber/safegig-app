@@ -1,0 +1,29 @@
+Starting project at C:\Users\ddani\OneDrive\Desktop\SafeGig_Project\frontend
+React Compiler enabled
+Starting Metro Bundler
+Tunnel connected.
+Tunnel ready.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+λ Bundled 2701ms node_modules\expo-router\node\render.js (751 modules)
+Web node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (2228/2228)
+Web Bundled 3637ms node_modules\expo\AppEntry.js (2228 modules)
+Android node_modules\expo\AppEntry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Android node_modules\expo\AppEntry.js ▓▓▓░░░░░░░░░░░░░ 21.3% (30/65)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 59.7% (118/234)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 60.7% (363/466)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 76.7% (549/642)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 76.7% ( 932/2510)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 76.7% (1861/2510)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.8% (2573/2592)
+Android node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (2768/2769)
+Android Bundled 29215ms node_modules\expo\AppEntry.js (2769 modules)
+ LOG  OTP verified for 9581012316
+ ERROR  API Error in Onboarding: [SyntaxError: JSON Parse error: Unexpected character in number: -]
+ ERROR  API Error in Onboarding: [SyntaxError: JSON Parse error: Unexpected character in number: -]
+ ERROR  Text strings must be rendered within a <Text> component.
+ LOG  Purchasing Max
+ ERROR  API Error in Onboarding: [SyntaxError: JSON Parse error: Unexpected character in number: -]
+ ERROR  [Error: Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.
+
+Check the render method of `WorkerDashboardScreen`.]
