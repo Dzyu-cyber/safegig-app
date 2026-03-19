@@ -60,12 +60,6 @@ export default function SplashScreen({ onFinish }) {
                     resizeMode="contain"
                 />
                 <Animated.Text style={[
-                    styles.appName,
-                    { opacity: textFadeAnim }
-                ]}>
-                    SAFEGIG
-                </Animated.Text>
-                <Animated.Text style={[
                     styles.tagline,
                     { opacity: textFadeAnim }
                 ]}>
@@ -87,8 +81,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     logo: {
-        width: width * 0.4,
-        height: width * 0.4,
+        width: 280,
+        height: 150,
         marginBottom: 20,
     },
     appName: {
