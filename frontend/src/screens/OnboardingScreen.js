@@ -30,45 +30,16 @@ export default function OnboardingScreen({ navigation }) {
                 console.log("OTP verified for", phone);
                 setStep(2);
             } else if (step === 2) {
-                // Save Profile to PostgreSQL
-                const dummyName = "Partner " + phone.slice(-4);
-                const response = await fetch(`${API_BASE_URL}/test_db`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: phone,
-                        name: dummyName,
-                        phone: phone,
-                        platform: platform,
-                        zone: city === 'Bengaluru' ? '560001' : '400001'
-                    })
-                });
-                const data = await response.json();
-                console.log("Profile saved:", data);
+                // Save Profile (Mock Mode for Vercel Demo)
+                await new Promise(r => setTimeout(r, 800));
                 setStep(3);
             } else if (step === 3) {
-                // Fetch dynamic premium for selected zone
-                const pincode = city === 'Bengaluru' ? '560001' : '400001';
-                const response = await fetch(`${API_BASE_URL}/get_premium/${pincode}`);
-                const data = await response.json();
-                console.log("Premium data fetched:", data);
-                // We could use data.calculated_premium to update plan prices if we wanted
+                // Fetch dynamic premium (Mock Mode)
+                await new Promise(r => setTimeout(r, 600));
                 setStep(4);
             } else if (step === 4) {
-                // Purchase policy in database
-                console.log("Purchasing", selectedPlan);
-                const response = await fetch(`${API_BASE_URL}/buy_policy`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: phone,
-                        zone: city === 'Bengaluru' ? '560001' : '400001',
-                        premium_paid: selectedPlan === 'Essential' ? 49 : (selectedPlan === 'Standard' ? 89 : 149),
-                        coverage_amount: 4000.0
-                    })
-                });
-                const data = await response.json();
-                console.log("Policy activated:", data.policy_id);
+                // Purchase policy (Mock Mode)
+                await new Promise(r => setTimeout(r, 1000));
                 setStep(5);
             } else if (step === 5) {
                 // On success, go to dashboard

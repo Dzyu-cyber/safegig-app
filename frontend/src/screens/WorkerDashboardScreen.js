@@ -12,9 +12,12 @@ export default function WorkerDashboardScreen() {
     useEffect(() => {
         const fetchWeather = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/get_premium/560001`);
-                const data = await response.json();
-                setWeather(data.weather_data);
+                // Mock Backend Response for Vercel
+                await new Promise(resolve => setTimeout(resolve, 800));
+                setWeather({
+                    temperature_celsius: 38,
+                    rain_probability_percent: 85
+                });
             } catch (error) {
                 console.error("Dashboard Fetch Error:", error);
             } finally {
