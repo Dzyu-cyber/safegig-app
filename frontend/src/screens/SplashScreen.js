@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     logo: {
-        width: 350,
-        height: 200,
+        width: 400,
+        height: 300,
         marginBottom: 20,
     },
     appName: {
@@ -92,10 +92,11 @@ const styles = StyleSheet.create({
         letterSpacing: 4,
     },
     tagline: {
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.7)',
-        marginTop: 8,
-        letterSpacing: 2,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#000000',
+        marginTop: 12,
+        letterSpacing: 1.5,
         textTransform: 'uppercase',
     }
 });
