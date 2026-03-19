@@ -77,6 +77,20 @@ This roadmap breaks down the development into short, focused phases to maximize 
 - **Phase 8: Admin Analytics Dashboard** (Web portal to visualize active claims and flagged metrics).
 - **Phase 9: Value-Add Extras** (Twilio Multilingual alerts, localized hydration and utility reminders).
 
+## 🚨 Adversarial Defense & Anti-Spoofing Strategy
+
+### 1. Spotting the Faker from the Genuinely Stranded Worker
+*   **"Mock Location" Detection:** Modern smartphone OS layers allow users to spoof GPS using developer tools. Our React Native app directly queries the OS to verify if the location is mocked (`isMockingLocation` flag). If a user claims to be in a flood zone but the OS reports the location is simulated, the claim is instantly dropped.
+*   **Time-Sync Validation:** Fakers often change their device time to manipulate claim windows. We validate the device's local timestamp against our secure Python FastApi server timestamp. If there is a massive drift (e.g., device claims it's 2 PM, server knows it's 10 AM), it's a confirmed spoof attempt.
+
+### 2. What Data Catches a Coordinated Fraud Ring?
+*   **The "Impossible Sync" (Redis Rate Limiting):** A coordinated script farm of 500 delivery partners will often strike at the exact same millisecond. We use Redis on our backend to monitor incoming claim requests. If 500 claims trigger from the *exact same GPS coordinate* (down to the 6th decimal) or the *exact same IP address* within a 3-minute window, the Python backend flags it as a Sybil attack and temporarily blocks the IP.
+*   **Velocity Checks (Physical Reality Check):** We store recent delivery pings in PostgreSQL. If a worker logged a delivery 10 minutes ago in an unaffected zone, and suddenly requests a claim from the epicenter of a market crash zone 40 kilometers away without the necessary physical transit time, the math proves it's a fake GPS jump.
+
+### 3. Flagging Bad Actors Without Punishing Honest Ones (Safe-Fail Approach)
+*   **The Conditional Queue:** We don't automatically deny every suspicious claim (which helps hackers reverse-engineer our logic). Instead, claims from newly registered accounts (< 7 days old) or accounts with zero historical deliveries are automatically routed to a "Pending Admin Review" queue in our web dashboard. 
+*   **The "Photo Proof" Fallback:** If a genuine worker is accidentally flagged, the app offers a frictionless fallback: the camera opens and asks for a live photo of the current environment (e.g., flooded street). A genuine worker takes the photo in 5 seconds and gets paid. A bot or script farm running on an emulator cannot produce a live photo of a local flood, entirely neutralizing the attack.
+
 ## ✅ Verification Plan
 
 - **Automated Tests:** Comprehensive unit tests on the AI risk mathematical formulas and integration testing on Backend API endpoints (Auth, Premium calculations, Fraud metrics).
