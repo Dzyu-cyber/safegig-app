@@ -63,7 +63,7 @@ export default function SplashScreen({ onFinish }) {
                     styles.appName,
                     { opacity: textFadeAnim }
                 ]}>
-                    GIGSHIELD
+                    SAFEGIG
                 </Animated.Text>
                 <Animated.Text style={[
                     styles.tagline,

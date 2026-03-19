@@ -68,7 +68,7 @@ export default function ProfileScreen({ navigation }) {
                     <Text style={styles.logoutText}>Log Out</Text>
                 </TouchableOpacity>
 
-                <Text style={styles.versionText}>GigShield v1.0.4 - Premium Protection</Text>
+                <Text style={styles.versionText}>SafeGig v1.0.4 - Premium Protection</Text>
             </ScrollView>
         </SafeAreaView>
     );

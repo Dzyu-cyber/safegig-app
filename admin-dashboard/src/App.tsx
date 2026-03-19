@@ -37,7 +37,7 @@ function App() {
       <aside className="w-64 bg-primary text-white p-6 hidden md:block">
         <div className="flex items-center gap-3 mb-12">
           <Shield className="text-green-400" size={32} />
-          <h1 className="text-2xl font-bold tracking-tight">GigShield</h1>
+          <h1 className="text-2xl font-bold tracking-tight">SafeGig</h1>
         </div>
 
         <nav className="space-y-4">

@@ -97,7 +97,7 @@ export default function OnboardingScreen({ navigation }) {
                 {step === 1 && (
                     <View style={styles.section}>
                         <View style={{ marginBottom: 30 }}>
-                            <Text style={styles.title}>Welcome to GigShield</Text>
+                            <Text style={styles.title}>Welcome to SafeGig</Text>
                             <Text style={styles.subtitle}>Protecting India's gig economy workers against climate risks.</Text>
                         </View>
 
@@ -290,7 +290,7 @@ export default function OnboardingScreen({ navigation }) {
                             <View style={styles.successHeader}>
                                 <View>
                                     <Text style={styles.successStatus}>POLICY ACTIVE</Text>
-                                    <Text style={styles.successTitle}>GigShield {selectedPlan}</Text>
+                                    <Text style={styles.successTitle}>SafeGig {selectedPlan}</Text>
                                 </View>
                                 <Shield color="#ffffff" size={40} opacity={0.5} />
                             </View>
